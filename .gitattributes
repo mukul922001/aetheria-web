@@ -1,0 +1,3 @@
+# Normalize line endings across machines (Windows/Mac/Linux).
+* text=auto eol=lf
+*.sh text eol=lf
