@@ -24,3 +24,15 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Small keycap styling for the HUD controls hint. */
+kbd {
+  display: inline-block;
+  padding: 0.05rem 0.4rem;
+  margin: 0 0.05rem;
+  border-radius: 0.3rem;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+}
