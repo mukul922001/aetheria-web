@@ -11,8 +11,10 @@ import { Controls } from "./controls";
 const WALK_SPEED = 5;
 const RUN_MULTIPLIER = 2;
 
-// How far behind/above the avatar the camera sits (third-person view).
-const CAMERA_OFFSET = new THREE.Vector3(0, 6, 10);
+// Third-person camera placement, relative to the avatar's FACING direction so it
+// always sits behind where you're walking (and you see where you're going).
+const CAMERA_DISTANCE = 9; // how far behind the avatar
+const CAMERA_HEIGHT = 5; // how high above the ground
 
 /**
  * The player avatar: a capsule the user drives with WASD/arrows, with a
@@ -31,6 +33,7 @@ export function Player() {
   // garbage-collection stutter, so we allocate once and reuse (senior habit).
   const moveDir = useMemo(() => new THREE.Vector3(), []);
   const desiredCamPos = useMemo(() => new THREE.Vector3(), []);
+  const forwardVec = useMemo(() => new THREE.Vector3(), []);
 
   // useFrame = the render loop. Runs ~60x/sec. `delta` = seconds since last frame.
   useFrame((_, delta) => {
@@ -50,11 +53,20 @@ export function Player() {
       avatar.rotation.y = Math.atan2(moveDir.x, moveDir.z);
     }
 
-    // Glide the camera toward "avatar position + offset". The Math.pow(...) makes
-    // the smoothing frame-rate independent, so the follow feels identical anywhere.
-    desiredCamPos.copy(avatar.position).add(CAMERA_OFFSET);
-    camera.position.lerp(desiredCamPos, 1 - Math.pow(0.0015, delta));
-    camera.lookAt(avatar.position.x, avatar.position.y + 1, avatar.position.z);
+    // Where is the avatar facing? Derive its forward vector from the current yaw.
+    const yaw = avatar.rotation.y;
+    forwardVec.set(Math.sin(yaw), 0, Math.cos(yaw));
+
+    // Put the camera BEHIND the facing direction (−forward) and above the ground, so
+    // when you change direction the camera arcs around to keep your path in view.
+    desiredCamPos
+      .copy(avatar.position)
+      .addScaledVector(forwardVec, -CAMERA_DISTANCE);
+    desiredCamPos.y += CAMERA_HEIGHT;
+
+    // Smoothly ease to that spot (frame-rate independent) and look at the avatar.
+    camera.position.lerp(desiredCamPos, 1 - Math.pow(0.0025, delta));
+    camera.lookAt(avatar.position.x, avatar.position.y + 1.2, avatar.position.z);
   });
 
   return (
