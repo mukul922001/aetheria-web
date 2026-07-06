@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Emit a minimal, self-contained server bundle (.next/standalone) so the Docker
+  // runtime image only needs Node + the app, not the whole node_modules tree.
+  output: "standalone",
 };
 
 export default nextConfig;
